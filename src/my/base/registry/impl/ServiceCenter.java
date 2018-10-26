@@ -89,6 +89,8 @@ public class ServiceCenter implements Server {
                 Method method = serviceClass.getMethod(methodName, parameterTypes);
                 Object result = method.invoke(serviceClass.newInstance(), arguments);
 
+                System.out.println(String.format("%s 方法： %s，结果： %s", serviceName, method, result.toString()));
+
                 // 3.将执行结果反序列化，通过socket发送给客户端
                 output = new ObjectOutputStream(client.getOutputStream());
                 output.writeObject(result);
