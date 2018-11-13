@@ -17,7 +17,7 @@ public class ServiceCenter implements Server {
 
     private static ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-    private static final HashMap<String, Class> serviceRegistry = new HashMap<>();
+    private static final HashMap<String, Class> serviceRegistry = new HashMap();
 
     private static boolean isRunning = false;
 
@@ -27,13 +27,11 @@ public class ServiceCenter implements Server {
         this.port = port;
     }
 
-    @Override
     public void stop() {
         isRunning = false;
         executor.shutdown();
     }
 
-    @Override
     public void start() throws IOException {
         ServerSocket server = new ServerSocket();
         server.bind(new InetSocketAddress(port));
@@ -48,17 +46,14 @@ public class ServiceCenter implements Server {
         }
     }
 
-    @Override
     public void register(Class serviceInterface, Class impl) {
         serviceRegistry.put(serviceInterface.getName(), impl);
     }
 
-    @Override
     public boolean isRunning() {
         return isRunning;
     }
 
-    @Override
     public int getPort() {
         return port;
     }
@@ -71,7 +66,6 @@ public class ServiceCenter implements Server {
             this.client = client;
         }
 
-        @Override
         public void run() {
             ObjectInputStream input = null;
             ObjectOutputStream output = null;
