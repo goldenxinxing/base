@@ -2,9 +2,9 @@ package jdk.jdk8;
 
 @FunctionalInterface
 public interface FuncInterDemo<T> {
-    /*default int compare(T a, T b){
-        return (int) a;
-    }*/
+    default boolean compare(T a, T b){
+        return a.equals(b);
+    }
     String toString(T t);
 
     boolean equals(Object obj);
