@@ -17,15 +17,15 @@ import java.util.concurrent.ExecutorService;
  * <pre>
  *
  * ExecutorService executor = Executors.newFixedThreadPool(4);
- * Director sirector = new Director(executor);
+ * Director executor = new Director(executor);
  * HandlerA a = new HandlerA();
  * HandlerB b = new HandlerB();
  * HandlerC c = new HandlerC();
- * sirector.begin(a, b);
- * sirector.after(a,b).then(c);
- * sirector.ready();
+ * executor.begin(a, b);
+ * executor.after(a,b).then(c);
+ * executor.ready();
  * Event e = new Event();
- * Event result = sirector.publish(e);
+ * Event result = executor.publish(e);
  *
  * class Event{
  * 	   ....
@@ -60,7 +60,7 @@ public class Executor<Event> {
      * Director constructor
      *
      * @param executorService
-     *            the executor service instance used by sirector.
+     *            the executor service instance used by executor.
      */
     public Executor(ExecutorService executorService) {
         this.executorService = executorService;
@@ -69,10 +69,10 @@ public class Executor<Event> {
 
     /**
      * Add event handlers with no dependencies to the transaction type of
-     * current sirector instance.
+     * current executor instance.
      *
      * <pre>
-     * sirector.begin(eventHandlerA).then(eventHandlerB);
+     * executor.begin(eventHandlerA).then(eventHandlerB);
      * </pre>
      *
      * means eventHandlerA must be called before eventHandlerB in the
@@ -99,12 +99,12 @@ public class Executor<Event> {
     /**
      * Used with {@linkplain EventHandlerGroup#then} class to imply the
      * dependency between event handlers. It does not add event handler to the
-     * transaction type of current sirector instance.
+     * transaction type of current executor instance.
      *
      * The following example:
      *
      * <pre>
-     * sirector.after(eventHandlerA).then(eventHandlerB);
+     * executor.after(eventHandlerA).then(eventHandlerB);
      * </pre>
      *
      * means eventHandlerA must be called before eventHandlerB in the
@@ -120,7 +120,7 @@ public class Executor<Event> {
      * @throws IllegalStateException
      *             if event handler in the parameter is not added to the
      *             transaction yet or <tt>ready()</tt> method of the same
-     *             sirector instance has been called.
+     *             executor instance has been called.
      *
      *
      * @see EventHandlerGroup#then(EventHandler...)
@@ -146,7 +146,7 @@ public class Executor<Event> {
      */
     public Event publish(Event event, long timeout) {
         if (!ready) {
-            throw new IllegalStateException("sirector not started.");
+            throw new IllegalStateException("executor not started.");
         }
         return builder.build(event, timeout).run();
     }
@@ -168,7 +168,7 @@ public class Executor<Event> {
      */
     public void publish(Event event, Callback<Event> callback) {
         if (!ready) {
-            throw new IllegalStateException("sirector not started.");
+            throw new IllegalStateException("executor not started.");
         }
         if (callback == null) {
             throw new IllegalArgumentException("callback can not be null");
@@ -177,10 +177,10 @@ public class Executor<Event> {
     }
 
     /**
-     * Return the status of event transaction type of the current sirector
+     * Return the status of event transaction type of the current executor
      * instance.
      *
-     * @return true if the event transaction of the current sirector instance is
+     * @return true if the event transaction of the current executor instance is
      *         ready by call {@link Executor#ready()}.
      */
     public boolean isReady() {
@@ -188,7 +188,7 @@ public class Executor<Event> {
     }
 
     /**
-     * Mark the event transaction type of the sirector instance as ready. This
+     * Mark the event transaction type of the executor instance as ready. This
      * method should be called before publish any events. And we should not
      * called transaction type building methods any more after this method
      * called. otherwise {@link IllegalStateException} will be throwed.

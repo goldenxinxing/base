@@ -44,7 +44,7 @@ public class EventHandlerGroup<Event> {
      * The following example:
      *
      * <pre>
-     * sirector.after(eventHandlerA).then(eventHandlerB);
+     * executor.after(eventHandlerA).then(eventHandlerB);
      * </pre>
      *
      * means eventHandlerA must be called before eventHandlerB in the
@@ -60,7 +60,7 @@ public class EventHandlerGroup<Event> {
      * @throws IllegalStateException
      *             if event handler in the parameter is not added to the
      *             transaction yet or <tt>ready()</tt> method of the same
-     *             sirector instance has been called.
+     *             executor instance has been called.
      *
      *
      * @see EventHandlerGroup#then(EventHandler...)
