@@ -12,144 +12,148 @@ import java.util.concurrent.locks.ReentrantLock;
 
 class ScriptRuntime<Event> {
     private final Event t;
-    private final ExecutorService executorService;
-    private final CountDownLatch completeLatch;
-    private final Map<EventHandler<Event>, EventProcess<Event>> processMap;
-    private final Callback<Event> callback;
-    private final long timeout;
-    private volatile Throwable error;
-    private final Lock lock = new ReentrantLock();
-    private volatile boolean canceled = false;
-    private final ArrayList<Future<?>> futures;
-    private static final ArrayList<Future<?>> EmptyFutures = new ArrayList(0);
 
-    ScriptRuntime(Event t, ExecutorService executorService, Map<EventHandler<Event>, EventProcess<Event>> processMap, Callback<Event> callback, long timeout) {
+    private final ExecutorService executorService;
+
+    private final CountDownLatch completeLatch;
+
+    private final Map<EventHandler<Event>, EventProcess<Event>> processMap;
+
+    private final Callback<Event> callback;
+
+    private final long timeout;
+
+    private volatile Throwable error;
+
+    private final Lock lock = new ReentrantLock();
+
+    private volatile boolean canceled = false;
+
+    private final ArrayList<Future<?>> futures;
+
+    private final static ArrayList<Future<?>> EmptyFutures = new ArrayList<Future<?>>(
+            0);
+
+    ScriptRuntime(Event t, ExecutorService executorService,
+                  Map<EventHandler<Event>, EventProcess<Event>> processMap,
+                  Callback<Event> callback, long timeout) {
         this.t = t;
         this.executorService = executorService;
         this.processMap = processMap;
         this.callback = callback;
         if (callback == null) {
-            this.completeLatch = new CountDownLatch(1);
+            completeLatch = new CountDownLatch(1);
         } else {
-            this.completeLatch = null;
+            completeLatch = null;
         }
-
         this.timeout = timeout;
-        if (this.timeout > 0L) {
-            this.futures = new ArrayList(1);
+        if (this.timeout > 0) {
+            futures = new ArrayList<Future<?>>(1);
         } else {
-            this.futures = EmptyFutures;
+            futures = EmptyFutures;
         }
-
     }
 
     Event run() {
-        ArrayList<EventProcess<Event>> processesWithNoDependencies = this.getProcessedWithNoDependencies();
-        Iterator i$ = processesWithNoDependencies.iterator();
 
-        while(i$.hasNext()) {
-            EventProcess<Event> process = (EventProcess)i$.next();
-            this.startProcess(process);
+        /*Find all process not depend on any other processes. It should be done before any process is started. Otherwise
+         * it may cause bug of 0.2.0-beta, executing some process more than once.
+         * */
+        ArrayList<EventProcess<Event>> processesWithNoDependencies = getProcessedWithNoDependencies();
+        for (EventProcess<Event> process : processesWithNoDependencies) {
+            startProcess(process);
         }
-
-        this.waitIfNecessary();
-        return this.t;
+        waitIfNecessary();
+        return t;
     }
 
     private ArrayList<EventProcess<Event>> getProcessedWithNoDependencies() {
-        ArrayList<EventProcess<Event>> processesWithNoDependencies = new ArrayList(1);
-        Iterator i$ = this.processMap.values().iterator();
-
-        while(i$.hasNext()) {
-            EventProcess<Event> process = (EventProcess)i$.next();
+        ArrayList<EventProcess<Event>> processesWithNoDependencies = new ArrayList<EventProcess<Event>>(1);
+        for (EventProcess<Event> process : processMap.values()) {
             if (!process.hasUnsatisfiedDependcies()) {
                 processesWithNoDependencies.add(process);
             }
         }
-
         return processesWithNoDependencies;
     }
 
     void markAsCompleted() {
-        if (this.callback == null) {
-            this.completeLatch.countDown();
+        if (callback == null) {
+            completeLatch.countDown();
         } else {
-            this.callback.onSuccess(this.t);
+            callback.onSuccess(t);
         }
-
     }
 
     void markAsError(Throwable error) {
-        if (this.callback == null) {
+        if (callback == null) {
             this.error = error;
-            this.completeLatch.countDown();
+            completeLatch.countDown();
         } else {
-            this.callback.onError(this.t, error);
+            callback.onError(t, error);
         }
-
     }
 
     private void cancel() {
-        this.lock.lock();
-
+        lock.lock();
         try {
-            this.canceled = true;
-            Iterator i$ = this.futures.iterator();
-
-            while(i$.hasNext()) {
-                Future<?> future = (Future)i$.next();
+            canceled = true;
+            for (Future<?> future : futures) {
                 future.cancel(true);
             }
         } finally {
-            this.lock.unlock();
+            lock.unlock();
         }
 
     }
 
     private void waitIfNecessary() {
-        if (this.callback == null) {
+        /**
+         * Synchronize style, we should block script call thread. when all event
+         * handler processes are done, we can wake up the call thread. If any
+         * exception is thrown when call event handler process, we should catch
+         * the exception, and throw the exception in the script call thread.
+         */
+        if (callback == null) { //
             try {
-                if (this.timeout > 0L) {
-                    if (!this.completeLatch.await(this.timeout, TimeUnit.MILLISECONDS)) {
-                        this.cancel();
+                if (timeout > 0) {
+                    if (!completeLatch.await(timeout, TimeUnit.MILLISECONDS)) {
+                        cancel();
                         throw new TimeoutException();
                     }
                 } else {
-                    this.completeLatch.await();
+                    completeLatch.await();
                 }
 
-                if (this.error != null) {
-                    throw new ExecutorException(this.error);
+                if (error != null) {
+                    throw new ExecutorException(error);
                 }
-            } catch (InterruptedException var2) {
-                throw new ExecutorException(var2);
+            } catch (InterruptedException e) {
+                throw new ExecutorException(e);
             }
         }
-
     }
 
     Callback<Event> getCallback() {
-        return this.callback;
+        return callback;
     }
 
     EventProcess<Event> getProcess(EventHandler<Event> eventHandler) {
-        return (EventProcess)this.processMap.get(eventHandler);
+        return processMap.get(eventHandler);
     }
 
     void startProcess(EventProcess<Event> process) {
-        if (this.timeout > 0L) {
-            this.lock.lock();
-
+        if (timeout > 0) {
+            lock.lock();
             try {
-                if (!this.canceled) {
-                    this.futures.add(this.executorService.submit(process));
+                if (!canceled) {
+                    futures.add(executorService.submit(process));
                 }
             } finally {
-                this.lock.unlock();
+                lock.unlock();
             }
         } else {
-            this.executorService.submit(process);
+            executorService.submit(process);
         }
-
     }
 }

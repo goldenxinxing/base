@@ -5,115 +5,133 @@ import java.util.concurrent.ExecutorService;
 
 class ScriptRuntimeBuilder<Event> {
     private final Script<Event> script;
+
     private final ExecutorService executorService;
-    private IdentityHashMap<EventHandler<Event>, EventProcess<Event>> processPrototypeMap = new IdentityHashMap();
+
+    private IdentityHashMap<EventHandler<Event>, EventProcess<Event>> processPrototypeMap = new IdentityHashMap<EventHandler<Event>, EventProcess<Event>>();
 
     ScriptRuntimeBuilder(Script<Event> script, ExecutorService executorService) {
         this.script = script;
         this.executorService = executorService;
-        this.preparePrototypes();
+        preparePrototypes();
     }
 
     private void preparePrototypes() {
-        Map<EventHandler<Event>, List<EventHandler<Event>>> dependedHandlerMap = this.copyEventHandlerMap(this.script.getdenpendedEventHandlers());
-        Map<EventHandler<Event>, List<EventHandler<Event>>> dependingHandlerMap = new HashMap();
-        Iterator i$ = dependedHandlerMap.keySet().iterator();
 
-        EventHandler eventHandler;
-        while(i$.hasNext()) {
-            eventHandler = (EventHandler)i$.next();
-            dependingHandlerMap.put(eventHandler, new ArrayList(1));
+        /**
+         * Copy depended event handler map from script map to avoid aside effect
+         * to Script.
+         */
+        Map<EventHandler<Event>, List<EventHandler<Event>>> dependedHandlerMap = copyEventHandlerMap(script
+                .getdenpendedEventHandlers());
+        /**
+         * Compute depending event handler map. We can compute only depending
+         * count, but that is not the key to the performance.
+         */
+        Map<EventHandler<Event>, List<EventHandler<Event>>> dependingHandlerMap = new HashMap<EventHandler<Event>, List<EventHandler<Event>>>();
+        for (EventHandler<Event> handler : dependedHandlerMap.keySet()) {
+            dependingHandlerMap.put(handler,
+                    new ArrayList<EventHandler<Event>>(1));
         }
-
-        i$ = dependedHandlerMap.keySet().iterator();
-
-        //Iterator i$;  remove
-        EventHandler handler;
-        while(i$.hasNext()) {
-            eventHandler = (EventHandler)i$.next();
-            i$ = ((List)dependedHandlerMap.get(eventHandler)).iterator();
-
-            while(i$.hasNext()) {
-                handler = (EventHandler)i$.next();
-                ((List)dependingHandlerMap.get(handler)).add(eventHandler);
+        for (EventHandler<Event> eventHandler : dependedHandlerMap.keySet()) {
+            for (EventHandler<Event> depended : dependedHandlerMap
+                    .get(eventHandler)) {
+                dependingHandlerMap.get(depended).add(eventHandler);
             }
         }
-
-        ScriptRuntimeBuilder<Event>.ScriptEndEventHandler scriptEndEventHandler = new ScriptRuntimeBuilder.ScriptEndEventHandler();
-        List<EventHandler<Event>> scriptEndDependingHandlers = new ArrayList(1);
-        i$ = dependedHandlerMap.keySet().iterator();
-
-        while(i$.hasNext()) {
-            handler = (EventHandler)i$.next();
-            List<EventHandler<Event>> dependedHandlers = (List)dependedHandlerMap.get(handler);
+        /**
+         * Compute event handlers that do not depended by any other event
+         * handlers and make them to depend SciptEndEventHandler.
+         */
+        ScriptEndEventHandler scriptEndEventHandler = new ScriptEndEventHandler();
+        List<EventHandler<Event>> scriptEndDependingHandlers = new ArrayList<EventHandler<Event>>(
+                1);
+        for (EventHandler<Event> handler : dependedHandlerMap.keySet()) {
+            List<EventHandler<Event>> dependedHandlers = dependedHandlerMap
+                    .get(handler);
             if (dependedHandlers.isEmpty()) {
                 scriptEndDependingHandlers.add(handler);
-                ((List)dependedHandlerMap.get(handler)).add(scriptEndEventHandler);
+                dependedHandlerMap.get(handler).add(scriptEndEventHandler);
             }
         }
+        dependedHandlerMap.put(scriptEndEventHandler,
+                new ArrayList<EventHandler<Event>>(0));
+        dependingHandlerMap.put(scriptEndEventHandler,
+                scriptEndDependingHandlers);
 
-        dependedHandlerMap.put(scriptEndEventHandler, new ArrayList(0));
-        dependingHandlerMap.put(scriptEndEventHandler, scriptEndDependingHandlers);
-
-        //Object process; replace
-        EventProcess process;
-        for(i$ = dependedHandlerMap.keySet().iterator(); i$.hasNext(); this.processPrototypeMap.put(handler, process)) {
-            handler = (EventHandler)i$.next();
+        /**
+         * Prepare process prototypes
+         */
+        for (EventHandler<Event> handler : dependedHandlerMap.keySet()) {
+            EventProcess<Event> process;
             if (handler != scriptEndEventHandler) {
-                process = new EventProcess(handler, ((List)dependingHandlerMap.get(handler)).size(), (List)dependedHandlerMap.get(handler));
+                process = new EventProcess<Event>(handler, dependingHandlerMap
+                        .get(handler).size(), dependedHandlerMap.get(handler));
             } else {
-                process = new ScriptRuntimeBuilder.ScriptEndEventProcess(handler, ((List)dependingHandlerMap.get(handler)).size(), (List)dependedHandlerMap.get(handler));
+                process = new ScriptEndEventProcess(handler,
+                        dependingHandlerMap.get(handler).size(),
+                        dependedHandlerMap.get(handler));
             }
+            processPrototypeMap.put(handler, process);
         }
-
     }
 
-    private Map<EventHandler<Event>, List<EventHandler<Event>>> copyEventHandlerMap(Map<EventHandler<Event>, List<EventHandler<Event>>> handlerMap) {
-        IdentityHashMap<EventHandler<Event>, List<EventHandler<Event>>> rt = new IdentityHashMap();
-        Iterator i$ = handlerMap.keySet().iterator();
-
-        while(i$.hasNext()) {
-            EventHandler<Event> eventHandler = (EventHandler)i$.next();
-            rt.put(eventHandler, new ArrayList((Collection)handlerMap.get(eventHandler)));
+    private Map<EventHandler<Event>, List<EventHandler<Event>>> copyEventHandlerMap(
+            Map<EventHandler<Event>, List<EventHandler<Event>>> handlerMap) {
+        IdentityHashMap<EventHandler<Event>, List<EventHandler<Event>>> rt = new IdentityHashMap<EventHandler<Event>, List<EventHandler<Event>>>();
+        for (EventHandler<Event> eventHandler : handlerMap.keySet()) {
+            rt.put(eventHandler,
+                    new ArrayList<EventHandler<Event>>(handlerMap
+                            .get(eventHandler)));
         }
-
         return rt;
     }
 
     ScriptRuntime<Event> build(Event event, long timeout) {
-        return this.build(event, timeout, (Callback)null);
+        return build(event, timeout, null);
     }
 
-    ScriptRuntime<Event> build(Event event, long timeout, Callback<Event> callback) {
-        IdentityHashMap<EventHandler<Event>, EventProcess<Event>> newProcessMap = new IdentityHashMap(this.processPrototypeMap.size());
-        ScriptRuntime<Event> runtime = new ScriptRuntime(event, this.executorService, newProcessMap, callback, timeout);
-        Iterator i$ = this.processPrototypeMap.keySet().iterator();
-
-        while(i$.hasNext()) {
-            EventHandler<Event> handler = (EventHandler)i$.next();
-            EventProcess<Event> newProcess = (EventProcess)((EventProcess)this.processPrototypeMap.get(handler)).clone();
+    @SuppressWarnings("unchecked")
+    ScriptRuntime<Event> build(Event event, long timeout,
+                               Callback<Event> callback) {
+        IdentityHashMap<EventHandler<Event>, EventProcess<Event>> newProcessMap = new IdentityHashMap<EventHandler<Event>, EventProcess<Event>>(
+                processPrototypeMap.size());
+        ScriptRuntime<Event> runtime = new ScriptRuntime<Event>(event,
+                executorService, newProcessMap, callback, timeout);
+        for (EventHandler<Event> handler : processPrototypeMap.keySet()) {
+            EventProcess<Event> newProcess = (EventProcess<Event>) processPrototypeMap
+                    .get(handler).clone();
             newProcess.init(runtime, event);
             newProcessMap.put(handler, newProcess);
         }
-
         return runtime;
     }
 
-    private class ScriptEndEventHandler implements EventHandler<Event> {
-        private ScriptEndEventHandler() {
-        }
-
-        public void onEvent(Event event) {
-        }
-    }
-
+    /**
+     * ScriptEndEventHandler will do work to complete the whole ScriptRuntime
+     * process.
+     *
+     */
     private class ScriptEndEventProcess extends EventProcess<Event> {
-        ScriptEndEventProcess(EventHandler<Event> handler, int depdending, List<EventHandler<Event>> dependedEventHandlers) {
+
+        ScriptEndEventProcess(EventHandler<Event> handler, int depdending,
+                              List<EventHandler<Event>> dependedEventHandlers) {
             super(handler, depdending, dependedEventHandlers);
         }
 
+        @Override
         public void run() {
-            this.runtime.markAsCompleted();
+            runtime.markAsCompleted();
+        }
+
+    }
+
+    private class ScriptEndEventHandler implements EventHandler<Event> {
+        public void onEvent(Event event) {
+            /**
+             * should never be called, ScriptEndEventHandlerProcess has override
+             * run method.
+             */
         }
     }
 }
