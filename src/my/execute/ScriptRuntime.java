@@ -119,10 +119,10 @@ class ScriptRuntime<Event> {
                 }
 
                 if (this.error != null) {
-                    throw new SirectorException(this.error);
+                    throw new ExecutorException(this.error);
                 }
             } catch (InterruptedException var2) {
-                throw new SirectorException(var2);
+                throw new ExecutorException(var2);
             }
         }
 

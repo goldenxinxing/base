@@ -2,13 +2,13 @@ package my.execute;
 
 import java.util.concurrent.ExecutorService;
 
-public class Sirector<Event> {
+public class Executor<Event> {
     private final ExecutorService executorService;
     private final Script<Event> script;
     private ScriptRuntimeBuilder<Event> builder;
     private volatile boolean ready = false;
 
-    public Sirector(ExecutorService executorService) {
+    public Executor(ExecutorService executorService) {
         this.executorService = executorService;
         this.script = new Script();
     }
