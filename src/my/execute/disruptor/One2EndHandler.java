@@ -12,6 +12,8 @@ import my.execute.disruptor.event.LongContext;
 public class One2EndHandler implements EventHandler<LongContext> {
     @Override
     public void onEvent(LongContext longContext, long l, boolean b) throws Exception {
+        longContext.setIndex(longContext.getIndex()+1);
+        Thread.sleep(1000);
         System.out.println("one2end exec:" + longContext.toString());
     }
 }

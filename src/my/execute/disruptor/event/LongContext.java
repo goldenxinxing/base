@@ -14,6 +14,7 @@ public class LongContext implements Serializable {
     private int index=0;
     private String name = "gaoxinxing";
     private String number = "201109010328";
+    private boolean isSuccess = false;
 
     public int getIndex() {
         return index;
@@ -37,6 +38,14 @@ public class LongContext implements Serializable {
 
     public void setNumber(String number) {
         this.number = number;
+    }
+
+    public boolean isSuccess() {
+        return isSuccess;
+    }
+
+    public void setSuccess() {
+        isSuccess = true;
     }
 
     public String toString(){

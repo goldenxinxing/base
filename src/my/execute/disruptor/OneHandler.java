@@ -12,9 +12,11 @@ import my.execute.disruptor.event.LongContext;
 public class OneHandler implements EventHandler<LongContext> {
     @Override
     public void onEvent(LongContext longContext, long l, boolean b) throws Exception {
-        for (int i = 10; i > 0; i--)
-            Thread.sleep(10);
-        System.out.println("one exec:" + longContext.toString());
+
+        Thread.sleep(10);
+        /*for (int i = 10; i > 0; i--)
+            Thread.sleep(10);*/
+        //System.out.println("one exec:" + longContext.toString());
 
     }
 }

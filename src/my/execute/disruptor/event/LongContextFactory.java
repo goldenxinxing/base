@@ -12,7 +12,7 @@ public class LongContextFactory implements EventFactory<LongContext> {
     @Override
     public LongContext newInstance() {
         LongContext longContext = new LongContext();
-        longContext.setIndex(1);
+        longContext.setIndex(0);
         longContext.setName("gxx");
         return longContext;
     }

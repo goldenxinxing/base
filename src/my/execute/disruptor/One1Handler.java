@@ -12,6 +12,8 @@ import my.execute.disruptor.event.LongContext;
 public class One1Handler implements EventHandler<LongContext> {
     @Override
     public void onEvent(LongContext longContext, long l, boolean b) throws Exception {
-        System.out.println("one1 exec:" + longContext.toString());
+
+        Thread.sleep(60);
+        //System.out.println("one1 exec:" + longContext.toString());
     }
 }

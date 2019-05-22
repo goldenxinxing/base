@@ -12,6 +12,9 @@ import my.execute.disruptor.event.LongContext;
 public class TwoHandler implements EventHandler<LongContext> {
     @Override
     public void onEvent(LongContext longContext, long l, boolean b) throws Exception {
-        System.out.println("two exec:" + longContext.toString());
+
+        Thread.sleep(10);
+        longContext.setSuccess();
+        //System.out.println("two exec:" + longContext.toString());
     }
 }
