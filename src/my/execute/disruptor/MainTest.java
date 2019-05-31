@@ -1,14 +1,15 @@
 package my.execute.disruptor;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
 import com.lmax.disruptor.util.DaemonThreadFactory;
+import my.execute.Executor;
 import my.execute.disruptor.event.LongContext;
 import my.execute.testCompare.executor.ExecutorTest;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 /**
  * @Package: my.execute.disruptor<br>
@@ -18,14 +19,15 @@ import java.util.concurrent.Executors;
  */
 public class MainTest {
     public static void main(String[] args) throws InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(10);
 
-        ExecutorService executor = Executors.newFixedThreadPool(4);
+
         ExecutorTest executorTest = new ExecutorTest();
         // start
         long start = System.currentTimeMillis();
-        RingBuffer<LongContext> ringBuffer = executorTest.prepare();
+        executorTest.prepare();
         for (int i = 1000; i > 0; i--) {
-            executorTest.disruptorTest(ringBuffer);
+            executorTest.disruptorTest();
         }
         // end
         System.out.println("disruptor:"+(System.currentTimeMillis() - start));
@@ -35,17 +37,17 @@ public class MainTest {
         for (int i = 1000; i > 0; i--) {
             executorTest.executorTest(executor);
         }
-        // end
-        System.out.println("ex:"+(System.currentTimeMillis() - start1));
 
+        System.out.println("ex:"+(System.currentTimeMillis() - start1));
+        // end
         // start
         long start2 = System.currentTimeMillis();
         for (int i = 1000; i > 0; i--) {
             executorTest.normalExecutorTest(executor);
         }
-        // end
-        System.out.println("self:"+(System.currentTimeMillis() - start2));
 
+        System.out.println("self:"+(System.currentTimeMillis() - start2));
+        // end
 
         /* 结果：
         disruptor:61159

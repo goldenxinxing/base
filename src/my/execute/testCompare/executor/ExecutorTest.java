@@ -1,5 +1,6 @@
 package my.execute.testCompare.executor;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.lmax.disruptor.EventHandler;
 import com.lmax.disruptor.RingBuffer;
 import com.lmax.disruptor.dsl.Disruptor;
@@ -14,9 +15,10 @@ import my.execute.disruptor.event.LongContextFactory;
 import my.execute.testCompare.handler.AHandler;
 import my.execute.testCompare.handler.BHandler;
 import my.execute.testCompare.handler.CHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -89,29 +91,35 @@ public class ExecutorTest {
         //System.out.println(System.currentTimeMillis() - start);
     }
 
-    Disruptor<LongContext> disruptor = new Disruptor<LongContext>(new LongContextFactory(), 32, DaemonThreadFactory.INSTANCE);
+    // disruptor 使用时需注意，创建disruptor时的构造参数中的线程池，需要等于handler数，若小于handler数，剩余的handler将不会被分配到线程
+    // 原因是，disruptor在start时，会为每个handler分配线程，并一直持有，导致线程池中工作队列的模式失效，永远不会被释放并执行blockquene中等待的任务
+    ThreadFactory threadFactory = new ThreadFactoryBuilder().setNameFormat("pool-my-%d").build();
+    //ExecutorService pool = new ThreadPoolExecutor(2, 200,1L, TimeUnit.MILLISECONDS, );
+    private ExecutorService executorService = new ThreadPoolExecutor(
+            3, 100, 3l,
+            TimeUnit.SECONDS, new LinkedBlockingQueue<>(500),
+            new ThreadPoolExecutor.AbortPolicy());
+    Disruptor<LongContext> disruptor = new Disruptor<LongContext>(new LongContextFactory(), 32, executorService);
     EventHandler<LongContext> one2 = new One1Handler();
     EventHandler<LongContext> one = new OneHandler();
     EventHandler<LongContext> two = new TwoHandler();
 
 
 
-
-    public void disruptorTest(RingBuffer<LongContext> ringBuffer) {
-        //long start = System.currentTimeMillis();
-
+    private Logger logger = LoggerFactory.getLogger(ExecutorTest.class);
+    public void disruptorTest() {
+        RingBuffer<LongContext> ringBuffer = disruptor.getRingBuffer();
         AtomicReference<LongContext> longContext = new AtomicReference<>();
         ringBuffer.publishEvent((event, sequence, buffer) -> {
             longContext.set(event);
         });
-        while (!longContext.get().isSuccess()){
+        /*while (!longContext.get().isSuccess()){
 
-        }
-        //System.out.println(System.currentTimeMillis() - start);
+        }*/
     }
 
-    public RingBuffer<LongContext> prepare(){
+    public void prepare(){
         disruptor.handleEventsWith(one, one2).then(two);
-        return disruptor.start();
+        disruptor.start();
     }
 }
