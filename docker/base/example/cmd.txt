@@ -1,0 +1,3 @@
+docker build --build-arg PRO_PATH=home --tag=base-example-1  .
+
+docker run -e LANG=th_TH.UTF-8 -e LANGUAGE=th_TH:en -e LC_ALL=th_TH.UTF-8 -e TZ=Asia/Bangkok -e yourPassword="gxx123456" -e i18n_message_fetch_way=remote-dict -p 8080:8080 7a11
