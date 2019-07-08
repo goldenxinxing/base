@@ -6,6 +6,5 @@ public interface FuncInterDemo<T> {
         return a.equals(b);
     }
     String toString(T t);
-
     boolean equals(Object obj);
 }
