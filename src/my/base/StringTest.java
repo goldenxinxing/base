@@ -23,5 +23,9 @@ public class StringTest {
         String str1 = "123";
         String str2 = "123";
         System.out.println(str1 == str2);
+
+        Integer i=null, j = null;
+        System.out.println(String.valueOf(i));
+        System.out.println(j.toString());
     }
 }

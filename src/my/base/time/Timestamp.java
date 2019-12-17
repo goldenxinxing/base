@@ -17,6 +17,7 @@ public class Timestamp {
         System.out.println(now.getTime());
         Date epoch = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse("01/01/1970 01:00:00");
         System.out.println(epoch.getTime());
-
+        Date old = new Date();
+        System.out.println(epoch.toInstant());
     }
 }
