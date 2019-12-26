@@ -129,6 +129,7 @@ public class DateTest {
     System.out.println(DateTest.formatDatetime(0, ZoneId.of("GMT")));
     System.out.println(DateTest.formatYMDTHMSSSZ(0));
     System.out.println(DateTest.parseDateTime("2019-12-24 14:28:06"));
+    System.out.println(DateTest.parseYMDTHMSSSZ("2019-12-24T14:28:06.001 +0900"));
   }
 
 
