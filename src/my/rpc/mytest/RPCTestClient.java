@@ -13,7 +13,7 @@ public class RPCTestClient {
 
     public static void main(String[] args) throws IOException {
         // 模拟客户端（调用端）
-        HelloService service = RPCClient.getRemoteProxyObj(HelloService.class, new InetSocketAddress("localhost", 8088));
+        HelloService service = RPCClient.getRemoteProxyObj(HelloService.class, new InetSocketAddress("192.168.1.15", 8088));
         System.out.println(service.sayHi("mytest"));
         System.out.println(service.sayHi("mytest2"));
     }
