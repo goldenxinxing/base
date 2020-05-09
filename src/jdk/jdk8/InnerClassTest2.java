@@ -18,7 +18,8 @@ public class InnerClassTest2 {
     }
     public static void main(String[] args) {
         InnerClassTest2 test2 = new InnerClassTest2();
-        A a = test2.innerTest(new B(), 6);
+        B b = new B();
+        A a = test2.innerTest(b, 6);
         a.doSomething();
     }
 }
@@ -108,6 +109,6 @@ class InnerClassTest2$1 extends A {
 }
 在doSomething过程中，java要求局部变量必须是final，因为构造器里使用this.val&b = var3，因为java
 里参数属于值拷贝，这时对于this.val&b的赋值不会同步回原对象（值）
-那么问题来了，正常的参数不是也会有这个问题吗，那也没必要非得final啊！
+那么问题来了，正常的参数不是也会有这个问题吗，那也没必要非得final啊！// 是的，个人感觉和这个没关系
 是不是本身机制（闭包？）
 */
