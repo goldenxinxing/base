@@ -17,6 +17,7 @@ public abstract class InnerClassTest {
     InnerClassTest innerClassTest = new InnerClassTest() {
       @Override
       public void doSomething(int num, String str, Integer ref, Temp temp) {
+        String a = args[0];
         num = 8;
         str = "8";
         // Integer545
