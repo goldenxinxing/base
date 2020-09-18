@@ -37,5 +37,12 @@ public class NumberTest {
         Integer i6 = new Integer(127);
         System.out.println(i5 == i6);
 
+        // 包装类和非包装类数组转换验证（能否直接互转？）
+        //int[] a = new int[10];
+//        long[] b = new long[10];
+//        int[] a = b;
+//        Long[] b2 = new Long[10];
+//        Integer[] a2 = b2;
+
     }
 }
