@@ -16,9 +16,13 @@
             </plugin>
         </plugins>
     </build>
+    <modules>
+        <module>rocketmq-transaction</module>
+        <module>kafkamq-transaction</module>
+    </modules>
     <groupId>com.jd.gxx</groupId>
     <artifactId>base</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
         <dependency>
@@ -93,6 +97,13 @@
         </dependency>
 
 
+
+        <!-- https://mvnrepository.com/artifact/org.fusesource/sigar -->
+        <dependency>
+            <groupId>org.fusesource</groupId>
+            <artifactId>sigar</artifactId>
+            <version>1.6.4</version>
+        </dependency>
 
     </dependencies>
 </project>
