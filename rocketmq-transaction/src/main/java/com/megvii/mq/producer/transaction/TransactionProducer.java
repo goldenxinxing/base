@@ -1,4 +1,4 @@
-package com.megvii.mq.transaction;
+package com.megvii.mq.producer.transaction;
 
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.SendResult;
@@ -33,7 +33,7 @@ public class TransactionProducer {
         for (int i = 0; i < 10; i++) {
             try {
                 Message msg =
-                        new Message("TopicTest", tags[i % tags.length], "KEY" + i,
+                        new Message("exampletopic", tags[i % tags.length], "KEY" + i,
                                 ("Hello RocketMQ " + i).getBytes(RemotingHelper.DEFAULT_CHARSET));
                 SendResult sendResult = producer.sendMessageInTransaction(msg, null);
                 System.out.printf("%s%n", sendResult);
