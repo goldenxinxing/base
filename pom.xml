@@ -19,6 +19,7 @@
     <modules>
         <module>rocketmq-transaction</module>
         <module>kafkamq-transaction</module>
+        <module>async</module>
     </modules>
     <groupId>com.jd.gxx</groupId>
     <artifactId>base</artifactId>
