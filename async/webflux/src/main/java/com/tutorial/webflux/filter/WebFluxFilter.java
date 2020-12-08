@@ -16,5 +16,15 @@ public class WebFluxFilter implements org.springframework.web.server.WebFilter {
                 .then(
                         webFilterChain.filter(serverWebExchange)
                 );
+        /*
+        * return Mono.fromRunnable(() -> {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).then(
+                webFilterChain.filter(serverWebExchange)
+        );*/
     }
 }
