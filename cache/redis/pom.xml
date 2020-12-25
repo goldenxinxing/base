@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>cache</artifactId>
+        <groupId>com.tutorial.gxx</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>redis</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.megvii.framework</groupId>
+            <artifactId>base-foundation-utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.megvii.framework</groupId>
+            <artifactId>base-swagger-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.megvii.framework</groupId>
+            <artifactId>base-log-starter</artifactId>
+        </dependency>
+        <!--<dependency>
+            <groupId>com.megvii.galaxy</groupId>
+            <artifactId>galaxy-log-sdk</artifactId>
+            <version>2.0.0.release</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+</project>
