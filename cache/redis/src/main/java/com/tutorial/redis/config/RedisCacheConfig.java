@@ -21,11 +21,6 @@ import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Objects;
 
-/**
- * @author <a href="mailto:zhanzhao@megvii.com">eko.zhan</a>
- * @version v1.0
- * @date 2020/11/30 13:57
- */
 @Slf4j
 @Configuration
 @EnableCaching//(proxyTargetClass = true)
