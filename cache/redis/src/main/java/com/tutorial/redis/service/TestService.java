@@ -15,18 +15,18 @@ import java.util.Map;
 @CacheConfig(cacheNames = "test_cache")
 public class TestService extends ITestService {
 
-    @Cacheable("globalCache")
+    @Cacheable(value = "globalCache",key = "#user.id")
     public Map<String, User> testuserKey(User user) {
         return Collections.singletonMap(user.getId(), user);
     }
 
     @Override
-    @Cacheable("globalCache-get")
+    @Cacheable(value = "globalCache-get",key = "'getUser'")
     public User getUser() {
         return new User("user", "10001");
     }
 
-    @Cacheable(value = "globalCache")
+    @Cacheable(value = "globalCache", key = "#organization.id")
     public Map<String, Organization> testOrganizationKey(Organization organization) {
         return Collections.singletonMap(organization.getId(), organization);
     }

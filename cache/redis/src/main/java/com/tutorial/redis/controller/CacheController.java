@@ -6,6 +6,7 @@ import com.tutorial.redis.model.User;
 import com.tutorial.redis.service.ITestService;
 import com.tutorial.redis.service.TestService;
 import com.tutorial.redis.service.WrapService;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,4 +33,15 @@ public class CacheController {
     public String cacheOrganization(Organization organization) {
         return JsonUtil.toJson(wrapService.testOrganizationKey(organization));
     }
+
+    @PostMapping("bytes")
+    public Response getByte(Response request) {
+        Response response = new Response();
+        response.setBytes("asdfghjkl".getBytes());
+        return response;
+    }
+}
+@Data
+class Response {
+    private byte[] bytes;
 }

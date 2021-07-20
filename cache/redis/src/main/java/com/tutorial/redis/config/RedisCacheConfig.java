@@ -98,7 +98,7 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
             return sb.toString();
         };
     }*/
-    @Override
+    /*@Override
     //@Bean
     public KeyGenerator keyGenerator() {
         return (target, method, params) -> {
@@ -110,7 +110,7 @@ public class RedisCacheConfig extends CachingConfigurerSupport {
             }
             return sb.toString();
         };
-    }
+    }*/
 
 }
 
